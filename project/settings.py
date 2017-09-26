@@ -129,6 +129,9 @@ REST_FRAMEWORK = {
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+EMAIL_HOST = os.environ.get("EMAIL_HOST", 'localhost')
+EMAIL_PORT = os.environ.get("EMAIL_PORT", 1025)
+
 DATABASES['default'] = dj_database_url.config()
 
 try:

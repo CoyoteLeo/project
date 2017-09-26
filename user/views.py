@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
-from django.contrib.auth.views import login_required
+from django.contrib.auth.views import login_required  # todo login required class-based view
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.base import View
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from .form import PasswordForgetForm, UserForm, UserCreateForm
 from .models import Profile
 import json
@@ -154,14 +154,32 @@ class PasswordChange(LoginRequiredMixin, View, HttpBase):
 class PasswordReset(object):
     class Request(View, HttpBase):
         def get(self, request):
-            pass
+            if request.user.is_authenticated:
+                return self.redirect(request=request, target=reverse("index"))
+            else:
+                return render(request, "user/password_reset_request.html", locals())
 
         def post(self, request):
-            pass
+            form = PasswordResetForm(request.POST)
+            if form.is_valid():
+                form.save(request, email_template_name="user/password_reset_email.html")
+                # todo: special: need to pass some parameters to method
+                return render(request, "user/password_reset_send_email.html", locals())
+            else:
+                error_message = ""
+                errors = json.loads(form.errors.as_json())
+                print(errors)
+                for error in errors:
+                    for tmp in errors[error]:
+                        error_message += tmp['message'] + "\n"
+                return render(request, "user/password_reset_request.html", locals())
 
     class Form(View, HttpBase):
         def get(self, request):
-            pass
+            if request.user.is_authenticated:
+                return self.redirect(request=request, target=reverse("index"))
+            else:
+                return render(request, "user/password_change_form.html", locals())
 
         def post(self, request):
             pass
