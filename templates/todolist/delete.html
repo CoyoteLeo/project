@@ -1,0 +1,41 @@
+{% extends 'todolist/base.html' %}
+{% block title %}
+    Delete Events
+{% endblock %}
+{% block header %}
+    Delete Events
+{% endblock %}
+{% block content %}
+    {% if todolist %}
+        <form action="" method="POST">{% csrf_token %}
+            <table border="1">
+                <tr>
+                    <td align='center' valign="middle">Num</td>
+                    <td align='center' valign="middle">Event</td>
+                    <td align='center' valign="middle">Content</td>
+                    <td align='center' valign="middle">Deadline</td>
+                    <td align='center' valign="middle">Add Time</td>
+                    <td align='center' valign="middle">Finish?</td>
+                    <td align='center' valign="middle">Delete</td>
+                </tr>
+                {% for event in todolist %}
+                    <tr>
+                        <td align='center' valign="middle">{{ forloop.counter }}</td>
+                        <td align='center' valign="middle"><a
+                                href="/todolist/{{ event.title }}">{{ event.title }}</a>
+                        </td>
+                        <td align='center' valign="middle" class="content">{{ event.content }}</td>
+                        <td align='center' valign="middle">{{ event.remind_time }}</td>
+                        <td align='center' valign="middle">{{ event.add_time }}</td>
+                        <td align='center' valign="middle">{{ event.finish_or_not }}</td>
+                        <td align='center' valign="middle"><input type="checkbox" name="delete_data"
+                                                                  value={{ event.title }}></td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <input type="submit" value="submit">
+        </form>
+    {% else %}
+        <p><font color="red">Nothing to delete.</font></p>
+    {% endif %}
+{% endblock %}

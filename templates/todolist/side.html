@@ -1,0 +1,42 @@
+{% extends 'todolist/base.html' %}
+{% load staticfiles %}
+{% block main %}
+    <script src="{% static 'js/jquery-2.2.4.js' %}"></script>
+    <script src="{% static 'js/tree.js' %}"></script>
+    {#    <link rel='stylesheet prefetch' href='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css'>#}
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-3 col-md-3 h4">
+                <div>
+                    {% if event %}
+                        <ul id="tree">
+                            {% for year,months in event.items %}
+                                <li>{{ year }}
+                                    <ul>
+                                        {% for month,events in months.items %}
+                                            <li>{{ month }}
+                                                <ul>
+                                                    {% for event in events %}
+                                                        <li class="text-overflow"
+                                                            style="width: inherit"><span
+                                                                class="glyphicon glyphicon-lock"></span> <a
+                                                                href="/todolist/{{ event.id }}">{{ event }}</a></li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-sm-9 col-md-9">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    {#    <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>#}
+    {#    <script src="{% static 'js/tree.js' %}"></script>#}
+{% endblock %}

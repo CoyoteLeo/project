@@ -1,0 +1,75 @@
+{% extends 'todolist/side.html' %}
+{% block title %}
+    待辦事項
+{% endblock %}
+{% block header %}
+    <h1>{{ html_header }}</h1>
+{% endblock %}
+{% block content %}
+    <div style="margin-bottom: 10px;margin-top: 10px">
+        <div style="display: inline-block">
+            <a style="text-align: center;vertical-align: middle" href="{% url "todolist_add" %}"
+               class="btn btn-primary">
+                <span class="glyphicon glyphicon-arrow-right"></span> &nbsp; 新增事件</a>
+            <a style="text-align: center;vertical-align: middle" href="{% url "todolist_delete" %}"
+               class="btn btn-primary">
+                <span class="glyphicon glyphicon-arrow-right"></span> &nbsp; 刪除事件</a>
+        </div>
+        <div class="pull-right">
+            <a style="text-align: center;vertical-align: middle" href="{% url "todolist" %}"
+               class="btn btn-info">
+                <span class="glyphicon glyphicon-arrow-right"></span> &nbsp; 查看全部</a>
+            <a style="text-align: center;vertical-align: middle" href="{% url "todolist_showcomplete" %}"
+               class="btn btn-info">
+                <span class="glyphicon glyphicon-arrow-right"></span> &nbsp; 查看已完成</a>
+            <a style="text-align: center;vertical-align: middle" href="{% url "todolist_showuncomplete" %}"
+               class="btn btn-info">
+                <span class="glyphicon glyphicon-arrow-right"></span> &nbsp; 查看未完成</a>
+            <a style="text-align: center;vertical-align: middle" href="{% url "todolist_showuncomplete" %}"
+               class="btn btn-info">
+                <span class="glyphicon glyphicon-arrow-right"></span> &nbsp; 查看已過期</a>
+        </div>
+    </div>
+    {% if todolist %}
+        <table style="text-align:center;" class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th style="width: 45px">項目</th>
+                <th style="width: 40%">標題</th>
+                <th style="width: 60%">內容</th>
+                <th style="width: 130px;">期限</th>
+                <th style="width: 130px">新增時間</th>
+                <th style="width: 80px">是否完成</th>
+                <th style="width: 90px;">修改</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for event in todolist %}
+                <tr style="width: inherit">
+                    <td data-th="項目" style="vertical-align:middle;">{{ forloop.counter }}</td>
+                    <td data-th="標題" style="vertical-align:middle;" class="text-overflow"><a
+                            href="/todolist/{{ event.id }}">{{ event.title }}</a></td>
+                    <td data-th="內容" style="vertical-align:middle;" class="text-overflow">{{ event.content }}</td>
+                    <td data-th="期限" style="vertical-align: middle">
+                        <div>{{ event.remind_time }}</div>
+                    </td>
+                    <td data-th="新增時間" style="vertical-align:middle;">{{ event.add_time }}</td>
+                    <td data-th="是否完成" style="vertical-align:middle;">
+                        {% if event.finish_or_not %}
+                            已完成
+                        {% else %}
+                            未完成
+                        {% endif %}
+                    </td>
+                    <td data-th="修改" style="vertical-align:middle;"><input class="btn btn-block btn-primary"
+                                                                           type="button" value="Modify"
+                                                                           onclick="location.href='/todolist/{{ event.id }}'">
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <a><font color="red">{{ alert }}</font></a>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'todolist/base.html' %}
+{% load static %}
+{% block title %}待辦事項 ToDoList{% endblock %}
+{% block header %}
+    <p align="center" class="h2">
+        歡迎使用待辦事項ToDoList
+    </p><br>
+{% endblock %}
+{% block main %}
+    {% if history %}
+        <p align="center" class="h4">
+            公告及事項
+        </p>
+        <table align="center" style="text-align:center;width: 570px" class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <td style="width: 70px">版本</td>
+                <td style="width: 150px">標題</td>
+                <td style="width: 200px">更新內容</td>
+                <td style="width: 150px">時間</td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for version in history %}
+                <tr>
+                    <td style="vertical-align:middle;">{{ version.version }}</td>
+                    <td style="vertical-align:middle;">{{ version.title }}</td>
+                    <td style="vertical-align:middle;">{{ version.detail }}</td>
+                    <td style="vertical-align:middle;">{{ version.time }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table><br>
+    {% endif %}
+    {% if request.user.is_authenticated %}
+        <p align="center" class="h4">
+            過期緊急事項!!
+        </p>
+        <table align="center" style="text-align:center;width: 570px" class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th style="width: 45px">項目</th>
+                <th style="width: 40%">標題</th>
+                <th style="width: 60%">內容</th>
+                <th style="width: 130px;">期限</th>
+                <th style="width: 130px">新增時間</th>
+                <th style="width: 80px">是否完成</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for event in todolist %}
+                <tr style="width: inherit">
+                    <td data-th="項目" style="vertical-align:middle;">{{ forloop.counter }}</td>
+                    <td data-th="標題" style="vertical-align:middle;" class="text-overflow"><a
+                            href="/todolist/{{ event.id }}">{{ event.title }}</a></td>
+                    <td data-th="內容" style="vertical-align:middle;" class="text-overflow">{{ event.content }}</td>
+                    <td data-th="期限" style="vertical-align: middle">
+                        <div>{{ event.remind_time }}</div>
+                    </td>
+                    <td data-th="新增時間" style="vertical-align:middle;">{{ event.add_time }}</td>
+                    <td data-th="是否完成" style="vertical-align:middle;color: #ff0000;">
+                        {% if event.finish_or_not %}
+                            已完成
+                        {% else %}
+                            未完成
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}
