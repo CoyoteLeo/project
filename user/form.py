@@ -23,6 +23,7 @@ class UserForm(ModelForm):
         model = User
         fields = ['first_name', 'last_name', 'email', 'password']
 
+
 class PasswordForgetForm(forms.Form):
     username = forms.CharField(label='Username', required=True)
     email = forms.EmailField(label='Email', required=True)

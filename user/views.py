@@ -19,6 +19,7 @@ class HttpBase(object):
 
 
 class Login(View, HttpBase):
+    # todo 輸入信箱 寄送認證信
     context = {"header": "登入 Login"}
 
     def __init__(self):
@@ -148,6 +149,22 @@ class PasswordChange(LoginRequiredMixin, View, HttpBase):
                     error_message += tmp['message'] + "\n"
             self.context["error_message"] = error_message
         return self.get(request)
+
+
+class PasswordReset(object):
+    class Request(View, HttpBase):
+        def get(self, request):
+            pass
+
+        def post(self, request):
+            pass
+
+    class Form(View, HttpBase):
+        def get(self, request):
+            pass
+
+        def post(self, request):
+            pass
 
 
 def index(request):
