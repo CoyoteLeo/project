@@ -1,7 +1,7 @@
 from django.forms import ModelForm
 from django import forms
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordResetForm
 
 
 class UserCreateForm(UserCreationForm):
@@ -24,6 +24,5 @@ class UserForm(ModelForm):
         fields = ['first_name', 'last_name', 'email', 'password']
 
 
-class PasswordForgetForm(forms.Form):
-    username = forms.CharField(label='Username', required=True)
-    email = forms.EmailField(label='Email', required=True)
+class UserPasswordResetForm(PasswordResetForm):
+    pass

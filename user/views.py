@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
-from django.contrib.auth.views import login_required  # todo login required class-based view
+# todo login required class-based view
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.base import View
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
-from .form import PasswordForgetForm, UserForm, UserCreateForm
+from django.contrib.auth.forms import PasswordChangeForm
+from .form import UserForm, UserCreateForm, UserPasswordResetForm
 from .models import Profile
 import json
 
@@ -14,7 +14,8 @@ import json
 class HttpBase(object):
     http_method_names = ['get', 'post']
 
-    def redirect(self, request, target):
+    @staticmethod
+    def redirect(request, target):
         return HttpResponseRedirect(request.GET['next']) if "next" in request.GET else redirect(target)
 
 
@@ -153,18 +154,35 @@ class PasswordChange(LoginRequiredMixin, View, HttpBase):
 
 class PasswordReset(object):
     class Request(View, HttpBase):
+
+        def __init__(self):
+            self.context = {}
+            super(View, self).__init__()
+
         def get(self, request):
             if request.user.is_authenticated:
                 return self.redirect(request=request, target=reverse("index"))
             else:
-                return render(request, "user/password_reset_request.html", locals())
+                return render(request, "user/password_reset_request.html", self.context)
 
         def post(self, request):
-            form = PasswordResetForm(request.POST)
+            form = UserPasswordResetForm(request.POST)
             if form.is_valid():
-                form.save(request, email_template_name="user/password_reset_email.html")
+                # todo password reset form 可在 form.py 繼承django預設並對其進行客製(email內容等等)
+                form.save(request=request, email_template_name="user/password_reset_email.html",
+                          use_https=request.is_secure(), domain_override="best-todolist.herokuapp.com/")
+                '''
+                from django.contrib.sites.shortcuts import get_current_site
+                current_site = get_current_site(request)
+                site_name = current_site.name
+                domain = current_site.domain
+                site_name = domain = domain_override
+                from django.contrib.auth.tokens import default_token_generator
+                token= default_token_generator.make_token(user),
+                protocol='https' if request.is_secure() else 'http',
+                '''
                 # todo: special: need to pass some parameters to method
-                return render(request, "user/password_reset_send_email.html", locals())
+                return render(request, "user/password_reset_send_email.html", self.context)
             else:
                 error_message = ""
                 errors = json.loads(form.errors.as_json())
@@ -172,7 +190,7 @@ class PasswordReset(object):
                 for error in errors:
                     for tmp in errors[error]:
                         error_message += tmp['message'] + "\n"
-                return render(request, "user/password_reset_request.html", locals())
+                return render(request, "user/password_reset_request.html", self.context)
 
     class Form(View, HttpBase):
         def get(self, request):

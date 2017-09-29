@@ -50,8 +50,7 @@ ROOT_URLCONF = 'project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')]
-        ,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -129,8 +128,13 @@ REST_FRAMEWORK = {
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-EMAIL_HOST = os.environ.get("EMAIL_HOST", 'localhost')
-EMAIL_PORT = os.environ.get("EMAIL_PORT", 1025)
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", None)
+EMAIL_HOST = os.environ.get("EMAIL_HOST", None)
+EMAIL_PORT = os.environ.get("EMAIL_PORT", None)
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", None)
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", None)
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", False)
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", None)
 
 DATABASES['default'] = dj_database_url.config()
 
