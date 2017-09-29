@@ -138,6 +138,8 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", None)
 
 DATABASES['default'] = dj_database_url.config()
 
+HOST = os.environ.get("HOST", None)
+
 try:
     from .local_settings import *
 except ImportError:

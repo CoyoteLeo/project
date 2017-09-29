@@ -1,14 +1,20 @@
 from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
+from django.utils.encoding import force_text
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth.tokens import default_token_generator
 # todo login required class-based view
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.base import View
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import PasswordChangeForm
-from .form import UserForm, UserCreateForm, UserPasswordResetForm
+from django.contrib.auth import get_user_model
+from django.conf import settings
+from .form import UserForm, UserCreateForm, PasswordResetRequestForm, UserPasswordResetForm, UserPasswordChangeForm
 from .models import Profile
 import json
+
+UserModel = get_user_model()
 
 
 class HttpBase(object):
@@ -130,13 +136,13 @@ class PasswordChange(LoginRequiredMixin, View, HttpBase):
         super(PasswordChange, self).__init__()
 
     def get(self, request):
-        self.context['form'] = PasswordChangeForm
+        self.context['form'] = UserPasswordChangeForm
         return render(request, "user/password_change_form.html", self.context)
 
     def post(self, request):
         user = User.objects.get(id=request.user.id)
         print(request.POST)
-        form = PasswordChangeForm(user, request.POST)
+        form = UserPasswordChangeForm(user, request.POST)
         if form.is_valid():
             form.save()
             logout(request)
@@ -166,11 +172,11 @@ class PasswordReset(object):
                 return render(request, "user/password_reset_request.html", self.context)
 
         def post(self, request):
-            form = UserPasswordResetForm(request.POST)
+            form = PasswordResetRequestForm(request.POST)
             if form.is_valid():
                 # todo password reset form 可在 form.py 繼承django預設並對其進行客製(email內容等等)
                 form.save(request=request, email_template_name="user/password_reset_email.html",
-                          use_https=request.is_secure(), domain_override="best-todolist.herokuapp.com/")
+                          use_https=request.is_secure(), domain_override=settings.HOST)
                 '''
                 from django.contrib.sites.shortcuts import get_current_site
                 current_site = get_current_site(request)
@@ -193,14 +199,43 @@ class PasswordReset(object):
                 return render(request, "user/password_reset_request.html", self.context)
 
     class Form(View, HttpBase):
-        def get(self, request):
+
+        def __init__(self):
+            self.context = {}
+            super(View, self).__init__()
+
+        def __check_idenity(self, uidb64=None, token=None):
+            if uidb64 is not None and token is not None:
+                uid = force_text(urlsafe_base64_decode(uidb64))
+                user = UserModel._default_manager.get(pk=uid)
+                if user is not None and default_token_generator.check_token(user, token):
+                    self.context['validlink'] = True
+                    return user
+            return None
+
+        def get(self, request, uidb64=None, token=None):
             if request.user.is_authenticated:
                 return self.redirect(request=request, target=reverse("index"))
             else:
-                return render(request, "user/password_change_form.html", locals())
+                user = self.__check_idenity(uidb64=uidb64, token=token)
+                if user is None:
+                    return redirect(reverse("index"))
+                # form = UserPasswordResetForm(user)
+                return render(request, "user/password_reset_form.html", self.context)
 
-        def post(self, request):
-            pass
+        def post(self, request, uidb64=None, token=None):
+            if request.user.is_authenticated:
+                return self.redirect(request=request, target=reverse("index"))
+            else:
+                user = self.__check_idenity(uidb64=uidb64, token=token)
+                if user is not None:
+                    form = UserPasswordResetForm(user, request.POST)
+                    if form.is_valid():
+                        form.save()
+                        return redirect(reverse("user:profile"))
+                    return self.get(request=request, uidb64=uidb64, token=token)
+                else:
+                    return redirect(reverse("index"))
 
 
 def index(request):
